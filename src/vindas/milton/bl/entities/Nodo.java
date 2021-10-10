@@ -4,7 +4,7 @@ public class Nodo {
     int dato;
     Nodo izq;
     Nodo der;
-    int factorEq;
+    int altura;
 
     public Nodo() {
     }
@@ -13,7 +13,7 @@ public class Nodo {
         this.dato = dato;
         this.izq = null;
         this.der = null;
-        this.factorEq = 0;
+        this.altura = 0;
     }
 
     public int getDato() {
@@ -41,10 +41,10 @@ public class Nodo {
     }
 
     public int getAltura() {
-        return factorEq;
+        return altura;
     }
 
-    public void setAltura(int factorEq) {
-        this.factorEq = factorEq;
+    public void setAltura(int altura) {
+        this.altura = altura;
     }
 }

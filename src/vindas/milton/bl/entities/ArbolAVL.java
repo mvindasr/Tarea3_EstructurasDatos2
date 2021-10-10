@@ -69,9 +69,31 @@ public class ArbolAVL {
                                          Métodos Privados
     --------------------------------------------------------------------------------------*/
 
-    private int factorEq(Nodo actual)
+    /**
+     * Método que retorna la altura de un nodo
+     * @param actual El nodo de consulta de la altura
+     * @return Retorna el entero con la altura del nodo
+     */
+    private int altura(Nodo actual)
     {
-        return actual == null ? -1 : actual.factorEq;
+        return actual == null ? 0 : actual.getAltura();
+    }
+
+    /**
+     * Método que actualiza la altura de un nodo después de la inserción
+     * @param actual El nodo al cual se le actualiza la altura
+     */
+    private void actualizarAltura(Nodo actual) {
+        actual.setAltura(1 + Math.max(altura(actual.getDer()), altura(actual.getIzq())));
+    }
+
+    /**
+     * Método que calcula el factor de equilibrio de un nodo
+     * @param actual El nodo al que se le calcula el factor de equilibrio
+     * @return Retorna el entero que representa el factor de equilibrio
+     */
+    private int factorEq(Nodo actual) {
+        return (actual == null) ? 0 : altura(actual.getDer()) - altura(actual.getIzq());
     }
 
     /**
@@ -81,52 +103,104 @@ public class ArbolAVL {
      * @return Retorna el nodo que se establece como raíz.
      */
     private Nodo agregarRecursivo(Nodo actual, int pDato) {
-            if (actual == null)
-                actual = new Nodo(pDato);
-            else if (pDato < actual.dato)
-            {
-                actual.izq = agregarRecursivo(actual.izq, pDato);
-                if( factorEq(actual.izq) - factorEq(actual.der) == 2)
-                    if( pDato < actual.izq.dato)
-                        actual = rotacionSimpleIzquierda(actual);
-                    else
-                        t = doubleWithLeftChild( t );
-            }
-            else if( x > t.data )
-            {
-                t.right = insert( x, t.right );
-                if( height( t.right ) - height( t.left ) == 2 )
-                    if( x > t.right.data)
-                        t = rotateWithRightChild( t );
-                    else
-                        t = doubleWithRightChild( t );
-            }
-            else
-                ;  // Duplicate; do nothing
-            t.height = max( height( t.left ), height( t.right ) ) + 1;
-            return t;
+        if (actual == null)
+            actual = new Nodo(pDato);
+        else if (pDato < actual.dato) {
+            actual.setIzq(agregarRecursivo(actual.getIzq(), pDato));
         }
+        else if (pDato > actual.dato ) {
+            actual.setDer(agregarRecursivo(actual.getDer(), pDato));
+        }
+        else
+            ;  // Dato duplicado...
+        return equilibrarAVL(actual);
+    }
 
     /**
-     * ROTACION SIMPLE A LA IZQUIERDA
+     * Método que revisa y equilibra el árbol AVL al insertarse un nuevo dato
+     * @param actual El nodo a revisar/equilibrar
+     * @return Retorna el nodo equilibrado
      */
-    private Nodo rotacionSimpleIzquierda(Nodo actual) {
+    private Nodo equilibrarAVL(Nodo actual) {
+        actualizarAltura(actual);
+        int factorEq = factorEq(actual);
 
+        // Si el factor de equilibrio del nodo actual es 2
+        if (factorEq > 1) {
+            // Si el factor de equilibrio del nodo derecho es -1, aplicar RDI
+            if (altura(actual.getDer().getDer()) < altura(actual.getDer().getIzq())) {
+                actual = rotacionDobleIzquierda(actual);
+            }
+            // Si el factor de equilibrio del nodo derecho es 1 o 0, aplicar RSI
+            else {
+                actual = rotacionSimpleIzquierda(actual);
+            }
+        }
+        else if (factorEq < -1) {
+            // Si el factor de equilibrio del nodo izquierdo es 1, aplicar RDD
+            if (altura(actual.getIzq().getDer()) > altura(actual.getIzq().getIzq())) {
+                actual = rotacionDobleDerecha(actual);
+            }
+            // Si el factor de equilibrio del nodo izquierdo es -1 o 0, aplicar RSD
+            else {
+                actual = rotacionSimpleDerecha(actual);
+            }
+        }
+        return actual;
+    }
+
+    /**
+     * Método que realiza una rotación simple a la izquierda con un nodo como parámetro
+     * @param p El nodo utilizado como padre para la rotación
+     * @return Retorna el nodo que quedó como padre después de la rotación
+     */
+    private Nodo rotacionSimpleIzquierda(Nodo p) {
+        Nodo q = p.getDer();
+        Nodo b = q.getIzq();
+        q.setIzq(p);
+        p.setDer(b);
+        actualizarAltura(p);
+        actualizarAltura(q);
+        return q;
     }
 
 
     /**
-     * ROTACION SIMPLE A LA DERECHA
+     * Método que realiza una rotación simple a la derecha con un nodo como parámetro
+     * @param p El nodo utilizado como padre para la rotación
+     * @return Retorna el nodo que quedó como padre después de la rotación
      */
+    private Nodo rotacionSimpleDerecha(Nodo p) {
+        Nodo q = p.getIzq();
+        Nodo b = q.getDer();
+        q.setDer(p);
+        p.setIzq(b);
+        actualizarAltura(p);
+        actualizarAltura(q);
+        return q;
+    }
 
     /**
-     * ROTACION DOBLE A LA IZQUIERDA
+     * Método que realiza una rotación doble a la izquierda con un nodo como parámetro
+     * @param p El nodo utilizado como padre para la rotación
+     * @return Retorna el nodo después de la rotación
      */
-
+    private Nodo rotacionDobleIzquierda(Nodo p) {
+        p.setDer(rotacionSimpleDerecha(p.getDer()));
+        p = rotacionSimpleIzquierda(p);
+        return p;
+    }
 
     /**
-     * ROTACION DOBLE A LA DERECHA
+     * Método que realiza una rotación doble a la derecha con un nodo como parámetro
+     * @param p El nodo utilizado como padre para la rotación
+     * @return Retorna el nodo después de la rotación
      */
+    private Nodo rotacionDobleDerecha(Nodo p) {
+        p.setIzq(rotacionSimpleIzquierda(p.getIzq()));
+        p = rotacionSimpleDerecha(p);
+        return p;
+    }
 
 
      /*-------------------------------------------------------------------------------------

@@ -50,7 +50,7 @@ public class Controller {
 
     public void agregarNumero() throws IOException {
         int num;
-        interfaz.imprimirMensaje("Digite el número que desea agregar al árbol binario: ");
+        interfaz.imprimirMensaje("Digite el número que desea agregar al árbol AVL: ");
         num = interfaz.leerOpcion();
         interfaz.imprimirMensaje(localGestor.agregarAArbol(num));
     }
